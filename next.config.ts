@@ -13,6 +13,9 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   // style-src-elem: บล็อก <style> tag จาก inline (vector หลักของ CSS keylogger / data exfil)
   // dev: Next ฉีด <style> สำหรับ HMR — ต้องเปิด
+  // prod: ตรวจด้วย browser แล้ว ทุกหน้าจริงโหลด CSS ผ่าน <link> external เท่านั้น (0 inline <style>, 0 CSP violation)
+  //   ข้อยกเว้นเดียว: หน้า _global-error ภายในของ Next มี <style> boilerplate (ตัวแปรสีเริ่มต้น) ที่ถูก
+  //   global-error.tsx ของเราแทนที่อยู่แล้ว → ถ้าโดนบล็อกก็แค่สีเพี้ยนชั่วคราวบนหน้า error ไม่กระทบฟังก์ชัน
   `style-src-elem 'self'${isDev ? " 'unsafe-inline'" : ""}`,
   // style-src-attr: ยอม inline style= attribute ของ <img> ที่ next/image ใส่ (position/size สำหรับ fill mode)
   "style-src-attr 'unsafe-inline'",
