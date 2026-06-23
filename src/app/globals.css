@@ -1,0 +1,173 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-paper: var(--paper);
+  --color-betta: var(--betta);
+  --color-betta-foreground: var(--betta-foreground);
+  --font-sans: var(--font-anuphan);
+  --font-heading: var(--font-trirong);
+  --font-serif: var(--font-trirong);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.6);
+  --radius-2xl: calc(var(--radius) * 2.2);
+}
+
+:root {
+  --radius: 0.5rem;
+
+  color-scheme: dark;
+
+  /* Deep-water dark editorial base */
+  --paper: oklch(0.17 0.012 240);
+  --background: oklch(0.163 0.013 240);
+  --foreground: oklch(0.955 0.006 90);
+
+  --card: oklch(0.205 0.013 240);
+  --card-foreground: oklch(0.955 0.006 90);
+  --popover: oklch(0.205 0.013 240);
+  --popover-foreground: oklch(0.955 0.006 90);
+
+  /* Teal — "น้ำลึก" (สว่างขึ้นให้เด่นบนพื้นมืด) */
+  --primary: oklch(0.64 0.094 195);
+  --primary-foreground: oklch(0.165 0.02 240);
+
+  --secondary: oklch(0.24 0.012 240);
+  --secondary-foreground: oklch(0.955 0.006 90);
+  --muted: oklch(0.235 0.012 240);
+  --muted-foreground: oklch(0.705 0.012 240);
+  --accent: oklch(0.26 0.014 240);
+  --accent-foreground: oklch(0.955 0.006 90);
+
+  /* Betta coral — จุดเด่น */
+  --betta: oklch(0.705 0.16 40);
+  --betta-foreground: oklch(0.17 0.025 40);
+
+  --destructive: oklch(0.62 0.21 25);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.64 0.094 195);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/40;
+  }
+  html {
+    @apply font-sans antialiased;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "liga" 1, "calt" 1;
+  }
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-heading), serif;
+    @apply tracking-tight;
+  }
+  ::selection {
+    background: var(--betta);
+    color: var(--betta-foreground);
+  }
+
+  /* เคารพการตั้งค่าลดการเคลื่อนไหวของระบบ (WCAG 2.3.3 Animation from Interactions / 2.2.2) */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* hairline divider used across the site */
+  .rule {
+    @apply h-px w-full bg-border;
+  }
+  /* small serif index labels e.g. (01) */
+  .index-num {
+    font-family: var(--font-serif), serif;
+    @apply text-betta/90 tabular-nums;
+  }
+  /* uppercase tracked eyebrow */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[0.72rem] font-medium uppercase tracking-[0.22em] text-muted-foreground;
+  }
+
+  /* ---------- Article typography (หน้าบทความ) ---------- */
+  .article-prose { @apply text-[1.075rem] leading-[1.85] text-foreground/90; }
+  .article-prose > p { @apply mb-6; }
+  .article-prose h2 {
+    /* scroll-mt กัน sticky header (h-16) บังหัวข้อเวลาคลิกลิงก์สารบัญ/แชร์ลิงก์เฉพาะส่วน */
+    @apply mt-12 mb-4 scroll-mt-20 text-3xl font-semibold tracking-tight text-foreground;
+  }
+  .article-prose h3 {
+    @apply mt-9 mb-3 text-xl font-semibold text-primary;
+  }
+  .article-prose ul { @apply mb-6 ml-1 space-y-2.5; }
+  .article-prose ul > li {
+    @apply relative pl-6;
+  }
+  .article-prose ul > li::before {
+    content: "";
+    @apply absolute left-0 top-[0.7em] h-1.5 w-1.5 rounded-full bg-betta;
+  }
+  .article-prose ol { @apply mb-6 ml-5 list-decimal space-y-2.5 marker:text-betta marker:font-semibold; }
+  .article-prose strong { @apply font-semibold text-foreground; }
+  .article-prose a { @apply text-primary underline underline-offset-4 decoration-primary/30 hover:decoration-primary; }
+  .article-lead { @apply text-xl leading-relaxed text-muted-foreground; }
+
+  /* ---------- พื้นหลังจุดประ — ย้ายจาก inline style เพื่อรองรับ CSP ที่ไม่มี style-src 'unsafe-inline' ---------- */
+  /* Hero: จุดเข้มบนพื้นมืดพร้อม mask จางลงล่าง */
+  .dot-mask {
+    background-image: radial-gradient(circle at 1px 1px, color-mix(in oklab, var(--foreground) 9%, transparent) 1px, transparent 0);
+    background-size: 26px 26px;
+    mask-image: linear-gradient(to bottom, black, transparent 85%);
+  }
+  /* Closing CTA: จุดสว่างบนพื้น primary */
+  .dot-light {
+    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.5) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+
+  /* ---------- TiltCard: ย้าย inline style ออก ---------- */
+  /* parent: เปิด 3D space ให้ลูกหมุนได้ */
+  .tilt-3d { transform-style: preserve-3d; }
+  /* glow span — opacity/position ควบคุมจาก JS ผ่าน custom property (`--glow`, `--gx`, `--gy`) */
+  .tilt-glow {
+    opacity: var(--glow, 0);
+    transition: opacity 0.3s;
+    background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.55), transparent 42%);
+  }
+}

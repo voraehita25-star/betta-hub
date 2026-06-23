@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Bangkok
+    open-pull-requests-limit: 5
+    # รวม PR ของ dev deps + runtime patch/minor เป็นก้อนเดียวต่อสัปดาห์ ลด noise
+    groups:
+      dev-deps:
+        dependency-type: development
+        update-types: [minor, patch]
+      runtime-patches:
+        dependency-type: production
+        update-types: [patch, minor]
+    # major version bumps แยก PR ออกมา (น่ากลัวกว่า) แต่ไม่ต้องปิด
+    ignore: []
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
