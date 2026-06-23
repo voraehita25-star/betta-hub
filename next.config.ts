@@ -20,7 +20,7 @@ const csp = [
   // style-src-attr: ยอม inline style= attribute ของ <img> ที่ next/image ใส่ (position/size สำหรับ fill mode)
   "style-src-attr 'unsafe-inline'",
   // 'unsafe-inline' รองรับสคริปต์ hydration ที่ Next ฝัง inline (static export ไม่มี nonce/proxy)
-  // External scripts เพิ่มความปลอดภัยด้วย Subresource Integrity (experimental.sri ด้านล่าง)
+  // ทุกสคริปต์เป็น same-origin first-party (ไม่มี external <script>) → script-src 'self' เพียงพอ
   // ปล่อย 'unsafe-inline' ใน script-src — trade-off: ตัดต้องใช้ middleware ที่เสีย static caching
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   `connect-src 'self'${isDev ? " ws:" : ""}`,
@@ -50,12 +50,10 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // ปิด X-Powered-By: Next.js (ไม่ leak ชนิด/เวอร์ชัน framework ให้ scanner)
   poweredByHeader: false,
-  // Subresource Integrity: ใส่ integrity hash ให้ external <script> ตอน build
-  // → กัน CDN/MITM แอบเปลี่ยน bundle (browser verify hash ก่อน execute)
-  // คงรองรับ static export (ต่างจาก nonce ที่ต้อง dynamic render)
-  experimental: {
-    sri: { algorithm: "sha256" },
-  },
+  // หมายเหตุ: เคยเปิด experimental.sri (integrity hash) แต่ปิดทิ้งแล้ว —
+  //   (1) บน Vercel + Turbopack hash ของ turbopack runtime chunk ไม่ตรง → browser บล็อกสคริปต์ → hydration พัง
+  //   (2) ไม่มี external <script> ในไซต์นี้ (ทุกสคริปต์ same-origin เสิร์ฟโดย Vercel เอง) SRI จึงแทบไม่เพิ่มความปลอดภัย
+  //   CSP `script-src 'self'` จำกัดแหล่งสคริปต์ให้อยู่ origin เดียวอยู่แล้ว (ตรงกับที่แผนระบุว่า SRI "ไม่มีจุดใส่")
   images: {
     formats: ["image/avif", "image/webp"],
     // จงใจปิด remote image — ทุกภาพต้องอยู่ใน /public; กันคนเผลอเปิด domain ใหม่ภายหลัง
