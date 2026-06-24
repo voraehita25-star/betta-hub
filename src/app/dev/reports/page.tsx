@@ -20,7 +20,12 @@ const REASON_LABEL: Record<ReportReason, string> = {
 function fmt(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
+  // createdAt เก็บเป็น UTC — แสดงเป็นเวลาไทยเสมอ ไม่อิง timezone ของเซิร์ฟเวอร์ (Vercel = UTC)
+  return d.toLocaleString("th-TH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Bangkok",
+  });
 }
 
 export default async function DevReportsPage({
