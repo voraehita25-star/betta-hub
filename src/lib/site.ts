@@ -1,16 +1,5 @@
 export const SITE_NAME = "BettaHub";
 
-// อีเมลรับแจ้ง "ลิงก์เสีย/สินค้าหมด" — อ่านจาก env var (ไม่ฝัง string ใน source/git history)
-// ป้องกัน scraper 2 ชั้น: (1) source/git ใน public repo ไม่มี email; (2) prerendered HTML ก็ไม่มี
-//   เพราะ <ReportLink/> render เฉพาะหลัง client hydration
-// ตั้งใน Vercel: NEXT_PUBLIC_REPORT_EMAIL_USER + NEXT_PUBLIC_REPORT_EMAIL_DOMAIN
-// ตั้ง local ใน .env.local (gitignored); ดู .env.example
-// ทั้งคู่เว้น "" เพื่อซ่อนปุ่มแจ้ง
-export const REPORT_EMAIL_PARTS: readonly [string, string] = [
-  process.env.NEXT_PUBLIC_REPORT_EMAIL_USER ?? "",
-  process.env.NEXT_PUBLIC_REPORT_EMAIL_DOMAIN ?? "",
-];
-
 // อ่านโดเมนจาก env เพื่อแยก dev / preview / prod
 // ลำดับความสำคัญ: ค่าที่ตั้งเองชัดเจน > โดเมน preview ของ Vercel > localhost (dev)
 export function getSiteUrl(): string {
