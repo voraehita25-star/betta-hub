@@ -12,9 +12,6 @@ const REASONS: { value: ReportReason; label: string }[] = [
   { value: "other", label: "อื่นๆ" },
 ];
 
-const COOLDOWN_MS = 30_000;
-const COOLDOWN_KEY = "bh:report:ts";
-
 type Status = "idle" | "sending" | "ok" | "err";
 
 /**
@@ -50,19 +47,7 @@ export function ReportLink({ productName }: { productName: string }) {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (status === "sending") return;
-
-    // soft-throttle ฝั่ง client (UX กันกดซ้ำ — ไม่ใช่ระบบความปลอดภัย)
-    try {
-      const last = Number(localStorage.getItem(COOLDOWN_KEY) ?? "0");
-      if (Date.now() - last < COOLDOWN_MS) {
-        setStatus("ok");
-        setMsg("คุณเพิ่งส่งคำแจ้งไปเมื่อสักครู่ — ขอบคุณครับ");
-        return;
-      }
-    } catch {
-      /* localStorage ใช้ไม่ได้ก็ข้ามการ throttle */
-    }
+    if (status === "sending") return; // กันกดซ้ำระหว่างกำลังส่ง (ปุ่มก็ disabled อยู่แล้ว)
 
     const form = e.currentTarget;
     const honeypot = (form.elements.namedItem("company") as HTMLInputElement | null)?.value ?? "";
@@ -83,11 +68,6 @@ export function ReportLink({ productName }: { productName: string }) {
       });
       const data = (await res.json().catch(() => null)) as { ok?: boolean } | null;
       if (res.ok && data?.ok) {
-        try {
-          localStorage.setItem(COOLDOWN_KEY, String(Date.now()));
-        } catch {
-          /* เพิกเฉย */
-        }
         setStatus("ok");
         setMsg("ขอบคุณ ส่งคำแจ้งแล้ว เราจะรีบตรวจสอบ");
         setNote("");
