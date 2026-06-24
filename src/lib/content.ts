@@ -71,7 +71,7 @@ export const articles: Article[] = [
     imageAlt: "ปลากัดสีม่วงครีบยาวในตู้กระจกทรงสี่เหลี่ยมปูกรวดสีอ่อน",
     readMin: 8,
     date: "2026-06-18",
-    author: "ทีมงาน BettaHub",
+    author: "ผู้ดูแล BettaHub",
     available: true,
   },
   {
@@ -84,7 +84,7 @@ export const articles: Article[] = [
     imageAlt: "ปลากัดสีแดงอมส้มครีบยาว พื้นหลังสีดำ",
     readMin: 7,
     date: "2026-06-20",
-    author: "ทีมงาน BettaHub",
+    author: "ผู้ดูแล BettaHub",
     available: true,
   },
   {
@@ -97,7 +97,7 @@ export const articles: Article[] = [
     imageAlt: "ปลากัดสีแดงเข้มว่ายในตู้กระจกทรงสูงน้ำใส",
     readMin: 7,
     date: "2026-06-12",
-    author: "ทีมงาน BettaHub",
+    author: "ผู้ดูแล BettaHub",
     available: true,
   },
   {
@@ -110,7 +110,7 @@ export const articles: Article[] = [
     imageAlt: "ปลากัดสีแดง-ฟ้าสุขภาพดีในตู้ที่มีต้นไม้น้ำและกรวดสีน้ำเงิน",
     readMin: 6,
     date: "2026-06-05",
-    author: "ทีมงาน BettaHub",
+    author: "ผู้ดูแล BettaHub",
     available: true,
   },
 ];

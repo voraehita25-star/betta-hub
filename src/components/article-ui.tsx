@@ -8,6 +8,12 @@ import { affiliateHref } from "@/lib/affiliate";
 import { JsonLd } from "@/components/json-ld";
 import { ProductGallery, type ProductImage } from "@/components/product-gallery";
 import { ReportLink } from "@/components/report-link";
+import { TocNav } from "@/components/toc-nav";
+import { Reveal } from "@/components/reveal";
+
+// ปล่อยเฉพาะลิงก์ https:// — guard เดียวกับ registry แต่ครอบ prop href/links ที่ส่งตรง (กัน javascript:/data:/mixed-content)
+const safeHref = (u: string | undefined): string | undefined =>
+  u && u.startsWith("https://") ? u : undefined;
 
 /** ส่วนหัวบทความ: breadcrumb + หมวด + ชื่อเรื่อง + บรรทัดผู้เขียน/วันที่/เวลาอ่าน + รูปปก */
 export function ArticleHeader({
@@ -71,18 +77,8 @@ export function TableOfContents({ items }: { items: { label: string; id: string 
   return (
     <div className="my-8 rounded-xl border border-border bg-muted/50 px-6 py-5">
       <strong className="font-heading text-base">ในบทความนี้</strong>
-      <ol className="mt-3 ml-5 list-decimal space-y-1.5 text-sm text-muted-foreground marker:text-betta">
-        {items.map((it) => (
-          <li key={it.id}>
-            <a
-              href={`#${it.id}`}
-              className="underline-offset-4 transition-colors hover:text-betta hover:underline"
-            >
-              {it.label}
-            </a>
-          </li>
-        ))}
-      </ol>
+      {/* scrollspy ไฮไลต์หัวข้อที่กำลังอ่าน (degrade เป็นลิงก์ข้ามปกติเมื่อไม่มี JS) */}
+      <TocNav items={items} />
     </div>
   );
 }
@@ -175,8 +171,8 @@ export function GearPick({
   links?: { label: string; key?: string; href?: string }[];
 }) {
   const headingId = useId();
-  // ลำดับความสำคัญ: href ที่ส่งตรง > ลิงก์จาก registry ตาม affiliateKey
-  const resolvedHref = href ?? (affiliateKey ? affiliateHref(affiliateKey) : undefined);
+  // ลำดับความสำคัญ: href ที่ส่งตรง > ลิงก์จาก registry ตาม affiliateKey (กรองให้เหลือเฉพาะ https://)
+  const resolvedHref = safeHref(href ?? (affiliateKey ? affiliateHref(affiliateKey) : undefined));
   // รวมรูปให้อยู่รูปแบบเดียว (หลายรูป หรือรูปเดี่ยว) เพื่อให้ผ่าน ProductGallery ทั้งหมด → ได้ lightbox เหมือนกัน
   const galleryImages: ProductImage[] | null =
     images && images.length > 0
@@ -187,15 +183,16 @@ export function GearPick({
   // รายการปุ่มลิงก์: ใช้ links ถ้าส่งมา ไม่งั้นใช้ลิงก์เดี่ยวจาก href/affiliateKey
   const ctas = (
     links && links.length > 0
-      ? links.map((l) => ({ label: l.label, href: l.href ?? (l.key ? affiliateHref(l.key) : undefined) }))
+      ? links.map((l) => ({ label: l.label, href: safeHref(l.href ?? (l.key ? affiliateHref(l.key) : undefined)) }))
       : resolvedHref
         ? [{ label: "ดูตัวอย่างรุ่นแนะนำ", href: resolvedHref }]
         : []
   ).filter((c): c is { label: string; href: string } => !!c.href);
   return (
+    <Reveal className="my-9">
     <aside
       aria-labelledby={headingId}
-      className="my-9 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6"
+      className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6"
     >
       <div className={galleryImages ? "flex flex-col gap-5 sm:flex-row sm:items-start" : undefined}>
         {galleryImages && (
@@ -257,6 +254,7 @@ export function GearPick({
         </div>
       </div>
     </aside>
+    </Reveal>
   );
 }
 

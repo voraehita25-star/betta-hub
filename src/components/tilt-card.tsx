@@ -22,6 +22,8 @@ export function TiltCard({
     const r = el.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width - 0.5;
     const py = (e.clientY - r.top) / r.height - 0.5;
+    // เลื่อนขึ้น compositor layer เฉพาะตอนกำลังเอียง (ไม่ทิ้ง will-change ค้างไว้ทั้งหน้า/บนมือถือ)
+    el.style.willChange = "transform";
     el.style.transform = `perspective(1000px) rotateY(${px * intensity}deg) rotateX(${-py * intensity}deg) scale(1.025)`;
     el.style.setProperty("--gx", `${(px + 0.5) * 100}%`);
     el.style.setProperty("--gy", `${(py + 0.5) * 100}%`);
@@ -33,6 +35,8 @@ export function TiltCard({
     if (!el) return;
     el.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale(1)";
     el.style.setProperty("--glow", "0");
+    // ปล่อย layer คืนหลังทรานสิชันจบ
+    el.style.willChange = "";
   }
 
   return (
@@ -40,7 +44,7 @@ export function TiltCard({
       ref={ref}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      className={`tilt-3d group/tilt relative transition-transform duration-300 ease-out will-change-transform ${className}`}
+      className={`tilt-3d group/tilt relative transition-transform duration-300 ease-out ${className}`}
     >
       {children}
       <span

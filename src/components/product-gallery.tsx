@@ -15,6 +15,7 @@ export function ProductGallery({ images }: { images: ProductImage[] }) {
   const single = images.length <= 1;
   const closeRef = useRef<HTMLButtonElement>(null);
   const openerRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const next = () => setActive((i) => (i + 1) % images.length);
   const prev = () => setActive((i) => (i - 1 + images.length) % images.length);
@@ -26,9 +27,37 @@ export function ProductGallery({ images }: { images: ProductImage[] }) {
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-      else if (e.key === "ArrowRight" && !single) setActive((i) => (i + 1) % images.length);
-      else if (e.key === "ArrowLeft" && !single) setActive((i) => (i - 1 + images.length) % images.length);
+      if (e.key === "Escape") {
+        // คืน focus ให้ปุ่มที่เปิด เหมือนเส้นทางปิดอื่น (closeLightbox) — กัน focus ตกไป <body> (WCAG 2.4.3)
+        setOpen(false);
+        openerRef.current?.focus();
+      } else if (e.key === "ArrowRight" && !single) {
+        setActive((i) => (i + 1) % images.length);
+      } else if (e.key === "ArrowLeft" && !single) {
+        setActive((i) => (i - 1 + images.length) % images.length);
+      } else if (e.key === "Tab") {
+        // กัก focus ไว้ในไดอะล็อก (modal จริงตามที่ประกาศ aria-modal) — วนระหว่างปุ่ม ปิด/ก่อนหน้า/ถัดไป
+        const dialog = dialogRef.current;
+        if (!dialog) return;
+        const focusables = Array.from(
+          dialog.querySelectorAll<HTMLElement>(
+            'button, a[href], [tabindex]:not([tabindex="-1"])',
+          ),
+        ).filter((el) => !el.hasAttribute("disabled"));
+        if (focusables.length === 0) return;
+        const first = focusables[0]!;
+        const last = focusables[focusables.length - 1]!;
+        const activeEl = document.activeElement;
+        if (e.shiftKey) {
+          if (activeEl === first || !dialog.contains(activeEl)) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else if (activeEl === last || !dialog.contains(activeEl)) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -118,6 +147,7 @@ export function ProductGallery({ images }: { images: ProductImage[] }) {
         if (!current) return null;
         return (
           <div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-label="รูปสินค้าขยาย"

@@ -38,8 +38,9 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/images/hero.jpg",
-        width: 1200,
-        height: 630,
+        // ตรงกับไฟล์จริง public/images/hero.jpg (1800×1200, 3:2) — เดิมประกาศ 1200×630 ไม่ตรง ทำให้ crawler ครอป/ย่อเพี้ยน
+        width: 1800,
+        height: 1200,
         alt: "BettaHub — ครบเรื่องปลากัด ตู้ปลา และอุปกรณ์",
       },
     ],

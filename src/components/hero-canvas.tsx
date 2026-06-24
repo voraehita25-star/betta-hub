@@ -17,12 +17,15 @@ function Bubble({
   color,
   speed,
   segments,
+  glass,
 }: {
   position: [number, number, number];
   scale: number;
   color: string;
   speed: number;
   segments: number;
+  /** เปิด transmission (กระจกใส) เฉพาะเดสก์ท็อป — บนมือถือปิดเพื่อตัด render pass พิเศษทุกเฟรม */
+  glass: boolean;
 }) {
   return (
     <Float speed={speed * 2} rotationIntensity={1} floatIntensity={1.1}>
@@ -30,8 +33,8 @@ function Bubble({
         <sphereGeometry args={[1, segments, segments]} />
         <meshPhysicalMaterial
           color={color}
-          transmission={0.92}
-          thickness={1.1}
+          transmission={glass ? 0.92 : 0}
+          thickness={glass ? 1.1 : 0}
           roughness={0.08}
           metalness={0}
           ior={1.4}
@@ -54,11 +57,13 @@ function Scene({
   reduced,
   count,
   segments,
+  glass,
 }: {
   mouse: Mouse;
   reduced: boolean;
   count: number;
   segments: number;
+  glass: boolean;
 }) {
   const group = useRef<THREE.Group>(null);
 
@@ -107,6 +112,7 @@ function Scene({
           color={b.color}
           speed={b.speed}
           segments={segments}
+          glass={glass}
         />
       ))}
     </group>
@@ -133,14 +139,17 @@ export default function HeroCanvas() {
     return () => io.disconnect();
   }, []);
 
+  // parallax ไม่ถูกใช้เลยเมื่อ reduced-motion (useFrame early-return) หรือ hero พ้นจอ (frameloop "never")
+  // → ไม่ผูก listener ความถี่สูงในสองสถานะนั้น (ประหยัด main-thread; reduced/visible เป็น reactive จึงผูก/ถอดเองตามสถานะ)
   useEffect(() => {
+    if (reduced || !visible) return;
     const onMove = (e: PointerEvent) => {
       mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
       mouse.current.y = (e.clientY / window.innerHeight) * 2 - 1;
     };
     window.addEventListener("pointermove", onMove);
     return () => window.removeEventListener("pointermove", onMove);
-  }, []);
+  }, [reduced, visible]);
 
   // ปรับคุณภาพตามอุปกรณ์: มือถือเบาลง (ลด segments/จำนวนฟอง/dpr) เดสก์ท็อปคงความสวย
   const segments = isMobile ? 24 : 32;
@@ -183,7 +192,7 @@ export default function HeroCanvas() {
             scale={[10, 6, 1]}
           />
         </Environment>
-        <Scene mouse={mouse} reduced={reduced} count={count} segments={segments} />
+        <Scene mouse={mouse} reduced={reduced} count={count} segments={segments} glass={!isMobile} />
       </Canvas>
     </div>
   );

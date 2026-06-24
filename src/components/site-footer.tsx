@@ -62,7 +62,7 @@ export function SiteFooter() {
           เมื่อคุณคลิกและสั่งซื้อ เราอาจได้รับค่าคอมมิชชันเล็กน้อยโดยที่คุณไม่ต้องจ่ายเพิ่ม
           ซึ่งช่วยสนับสนุนการทำคอนเทนต์ฟรีให้ทุกคน — เราแนะนำเฉพาะของที่เราเชื่อว่าดีจริงเท่านั้น
         </p>
-        <p className="mt-4 text-xs text-foreground/70">© 2026 BettaHub · สร้างเพื่อคนรักปลากัด</p>
+        <p className="mt-4 text-xs text-foreground/70">© {new Date().getFullYear()} BettaHub · สร้างเพื่อคนรักปลากัด</p>
       </div>
     </footer>
   );

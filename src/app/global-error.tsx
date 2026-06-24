@@ -2,8 +2,24 @@
 
 // global-error แทนที่ root layout ตอนเกิด error ที่ root จึงต้อง:
 // - มี <html>/<body> เอง  - re-import globals.css เพื่อให้มีธีมพื้นฐาน
+// - re-apply ฟอนต์ (next/font แปะ CSS var ไว้บน <html> ของ root layout เท่านั้น ซึ่งหน้านี้แทนที่ → ต้องโหลดเอง ไม่งั้นฟอนต์เพี้ยน)
 // - ใช้ unstable_retry (Next 16.2) ไม่ใช่ reset  - ใช้ React <title> แทน metadata export
 import "./globals.css";
+import { Trirong, Anuphan } from "next/font/google";
+
+const trirong = Trirong({
+  subsets: ["latin", "thai"],
+  weight: ["400", "500", "600"],
+  variable: "--font-trirong",
+  display: "swap",
+});
+
+const anuphan = Anuphan({
+  subsets: ["latin", "thai"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-anuphan",
+  display: "swap",
+});
 
 export default function GlobalError({
   unstable_retry,
@@ -12,7 +28,7 @@ export default function GlobalError({
   unstable_retry: () => void;
 }) {
   return (
-    <html lang="th">
+    <html lang="th" className={`${trirong.variable} ${anuphan.variable}`}>
       <body className="flex min-h-screen flex-col items-center justify-center bg-background px-5 text-center text-foreground">
         <title>เกิดข้อผิดพลาด · BettaHub</title>
         <p className="font-heading text-5xl font-semibold tracking-tight text-betta">อ๊ะ!</p>

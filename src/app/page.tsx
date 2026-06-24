@@ -4,6 +4,7 @@ import Link from "next/link";
 import { articles, categories, gallery } from "@/lib/content";
 import { Hero3D } from "@/components/hero-3d";
 import { TiltCard } from "@/components/tilt-card";
+import { Reveal } from "@/components/reveal";
 import { JsonLd } from "@/components/json-ld";
 import { websiteJsonLd } from "@/lib/jsonld";
 import { formatThaiDate } from "@/lib/site";
@@ -17,6 +18,11 @@ function getFeatured() {
 }
 const featured = getFeatured();
 
+// "อ่านล่าสุด" — เรียงใหม่→เก่าจริงตามวันที่ ไม่ผูกกับลำดับใน array (กันลำดับเพี้ยนเงียบๆ เมื่อแก้ข้อมูล)
+const latest = articles
+  .filter((a) => a.slug !== featured.slug)
+  .sort((a, b) => b.date.localeCompare(a.date));
+
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
@@ -27,8 +33,8 @@ export default function Home() {
       <JsonLd data={websiteJsonLd()} />
       {/* ============ HERO ============ */}
       <section className="relative overflow-hidden">
-        <div aria-hidden className="dot-mask pointer-events-none absolute inset-0 opacity-[0.5]" />
-        <div aria-hidden className="pointer-events-none absolute inset-0 z-0 opacity-90">
+        <div aria-hidden className="dot-mask pointer-events-none absolute inset-0 z-0 opacity-[0.5]" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-[1] opacity-90">
           <Hero3D />
         </div>
         <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 sm:px-8 md:grid-cols-2 md:py-24">
@@ -62,11 +68,11 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="mt-12 flex items-center gap-8">
+            <div className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-4 sm:gap-8">
               <Stat num={String(articles.filter((a) => a.available).length)} label="คู่มือเชิงลึก" />
-              <div className="h-10 w-px bg-border" />
+              <div className="hidden h-10 w-px bg-border sm:block" />
               <Stat num="ใช้จริง" label="รีวิวจากการเลี้ยงเอง" />
-              <div className="h-10 w-px bg-border" />
+              <div className="hidden h-10 w-px bg-border sm:block" />
               <Stat num="ฟรี" label="อ่านได้ทั้งหมด" />
             </div>
           </div>
@@ -79,7 +85,10 @@ export default function Home() {
                 src="/images/hero.jpg"
                 alt="ปลากัดครีบยาวสีแดงสด สายพันธุ์ฮาล์ฟมูน พื้นหลังสีดำ"
                 fill
-                preload
+                // ภาพนี้เป็น LCP บนเดสก์ท็อป แต่อยู่ใต้ fold บนมือถือ (grid ยุบเป็นคอลัมน์เดียว)
+                // จึงใช้ eager + fetchPriority แทน preload เพื่อไม่ฉีด <link preload> แย่ง critical path ของฟอนต์/CSS บนมือถือ
+                loading="eager"
+                fetchPriority="high"
                 sizes="(max-width: 768px) 100vw, 540px"
                 className="object-cover"
               />
@@ -109,90 +118,96 @@ export default function Home() {
 
       {/* ============ CATEGORIES ============ */}
       <section id="categories" className="scroll-mt-20 mx-auto max-w-6xl px-5 py-20 sm:px-8 md:py-28">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <span className="eyebrow"><span className="index-num">(สำรวจ)</span></span>
-            <h2 className="mt-3 max-w-md font-heading text-4xl font-semibold tracking-tight">
-              เริ่มจากเรื่องที่คุณอยากรู้
-            </h2>
+        <Reveal>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <span className="eyebrow"><span className="index-num">(สำรวจ)</span></span>
+              <h2 className="mt-3 max-w-md font-heading text-4xl font-semibold tracking-tight">
+                เริ่มจากเรื่องที่คุณอยากรู้
+              </h2>
+            </div>
+            <p className="max-w-xs text-sm text-muted-foreground">
+              เราแบ่งทุกอย่างเป็นหมวดให้หาง่าย ไม่ว่าคุณจะเพิ่งเริ่มหรือเลี้ยงมานานแล้ว
+            </p>
           </div>
-          <p className="max-w-xs text-sm text-muted-foreground">
-            เราแบ่งทุกอย่างเป็นหมวดให้หาง่าย ไม่ว่าคุณจะเพิ่งเริ่มหรือเลี้ยงมานานแล้ว
-          </p>
-        </div>
+        </Reveal>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {categories.map((c) => (
-            <Link key={c.index} href={c.href} className="group block">
-              <TiltCard className="rounded-xl">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
-                <Image
-                  src={c.image}
-                  alt={c.name}
-                  fill
-                  sizes="(max-width: 1024px) 50vw, 25vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <span className="index-num absolute left-3 top-3 text-sm font-medium text-background/90 drop-shadow">
-                  {c.index}
-                </span>
-              </div>
-              </TiltCard>
-              <h3 className="mt-4 flex items-center gap-2 font-heading text-lg font-semibold">
-                {c.name}
-                <span className="text-betta opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
-                  →
-                </span>
-              </h3>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{c.desc}</p>
-            </Link>
+          {categories.map((c, i) => (
+            <Reveal key={c.index} delay={i * 80}>
+              <Link href={c.href} className="group block">
+                <TiltCard className="rounded-xl">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
+                  <Image
+                    src={c.image}
+                    alt={c.name}
+                    fill
+                    sizes="(max-width: 1024px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <span className="index-num absolute left-3 top-3 text-sm font-medium text-background/90 drop-shadow">
+                    {c.index}
+                  </span>
+                </div>
+                </TiltCard>
+                <h3 className="mt-4 flex items-center gap-2 font-heading text-lg font-semibold">
+                  {c.name}
+                  <span className="text-betta opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
+                    →
+                  </span>
+                </h3>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{c.desc}</p>
+              </Link>
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* ============ FEATURED ============ */}
       <section className="mx-auto max-w-6xl px-5 sm:px-8">
-        <div className="grid overflow-hidden rounded-2xl border border-border bg-card md:grid-cols-2">
-          <div className="relative min-h-[280px]">
-            <Image
-              src={featured.image}
-              alt={featured.imageAlt}
-              fill
-              sizes="(max-width: 768px) 100vw, 540px"
-              className="object-cover"
-            />
-          </div>
-          <div className="flex flex-col justify-center p-8 sm:p-12">
-            <span className="eyebrow text-betta"><span aria-hidden>●</span> บทความเด่น</span>
-            <h2 className="mt-4 font-heading text-3xl font-semibold leading-snug tracking-tight sm:text-[2.3rem]">
-              {featured.title}
-            </h2>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground">{featured.excerpt}</p>
-            <div className="mt-6 flex items-center gap-3 text-sm text-muted-foreground">
-              <span>อ่าน {featured.readMin} นาที</span>
-              <span className="text-border">·</span>
-              <span>{formatThaiDate(featured.date)}</span>
+        <Reveal>
+          <div className="grid overflow-hidden rounded-2xl border border-border bg-card md:grid-cols-2">
+            <div className="relative min-h-[280px]">
+              <Image
+                src={featured.image}
+                alt={featured.imageAlt}
+                fill
+                sizes="(max-width: 768px) 100vw, 540px"
+                className="object-cover"
+              />
             </div>
-            <Link
-              href={`/articles/${featured.slug}`}
-              className="mt-7 inline-flex w-fit items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background transition-colors hover:bg-primary"
-            >
-              อ่านบทความ <span aria-hidden>→</span>
-            </Link>
+            <div className="flex flex-col justify-center p-8 sm:p-12">
+              <span className="eyebrow text-betta"><span aria-hidden>●</span> บทความเด่น</span>
+              <h2 className="mt-4 font-heading text-3xl font-semibold leading-snug tracking-tight sm:text-[2.3rem]">
+                {featured.title}
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground">{featured.excerpt}</p>
+              <div className="mt-6 flex items-center gap-3 text-sm text-muted-foreground">
+                <span>อ่าน {featured.readMin} นาที</span>
+                <span className="text-border">·</span>
+                <span>{formatThaiDate(featured.date)}</span>
+              </div>
+              <Link
+                href={`/articles/${featured.slug}`}
+                className="mt-7 inline-flex w-fit items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background transition-colors hover:bg-primary"
+              >
+                อ่านบทความ <span aria-hidden>→</span>
+              </Link>
+            </div>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* ============ LATEST ARTICLES ============ */}
       <section id="articles" className="scroll-mt-20 mx-auto max-w-6xl px-5 py-20 sm:px-8 md:py-28">
-        <div className="flex items-end justify-between">
-          <h2 className="font-heading text-4xl font-semibold tracking-tight">อ่านล่าสุด</h2>
-        </div>
+        <Reveal>
+          <div className="flex items-end justify-between">
+            <h2 className="font-heading text-4xl font-semibold tracking-tight">อ่านล่าสุด</h2>
+          </div>
+        </Reveal>
 
         <div className="mt-12 grid gap-8 md:grid-cols-3">
-          {articles
-            .filter((a) => a.slug !== featured.slug)
-            .map((a) => {
+          {latest.map((a, i) => {
             const inner = (
               <>
                 <TiltCard className="rounded-xl">
@@ -224,85 +239,92 @@ export default function Home() {
               </>
             );
 
-            return a.available ? (
-              <Link key={a.slug} href={`/articles/${a.slug}`} className="group flex flex-col">
-                {inner}
-              </Link>
-            ) : (
-              <div
-                key={a.slug}
-                aria-disabled="true"
-                className="group flex cursor-default flex-col opacity-70"
-              >
-                {inner}
-              </div>
+            return (
+              <Reveal key={a.slug} delay={i * 80}>
+                {a.available ? (
+                  <Link href={`/articles/${a.slug}`} className="group flex flex-col">
+                    {inner}
+                  </Link>
+                ) : (
+                  <div className="group flex cursor-default flex-col opacity-70">{inner}</div>
+                )}
+              </Reveal>
             );
           })}
         </div>
       </section>
 
       {/* ============ GALLERY ============ */}
-      <section className="bg-muted/40 py-20 md:py-24">
+      <section aria-labelledby="gallery-heading" className="bg-muted/40 py-20 md:py-24">
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
-          <span className="eyebrow">
-            <span className="index-num">(แกลเลอรี)</span> ความงามของปลากัด
-          </span>
-          <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-            {gallery.map((g) => (
-              <div key={g.src} className="group relative aspect-[3/4] overflow-hidden rounded-xl">
-                <Image
-                  src={g.src}
-                  alt={g.alt}
-                  fill
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-              </div>
+          <Reveal>
+            <span className="eyebrow"><span className="index-num">(แกลเลอรี)</span></span>
+            <h2 id="gallery-heading" className="mt-3 font-heading text-4xl font-semibold tracking-tight">
+              ความงามของปลากัด
+            </h2>
+          </Reveal>
+          <ul className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
+            {gallery.map((g, i) => (
+              <li key={g.src}>
+                <Reveal delay={i * 80} className="group relative block aspect-[3/4] overflow-hidden rounded-xl">
+                  <Image
+                    src={g.src}
+                    alt={g.alt}
+                    fill
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                </Reveal>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
       {/* ============ VALUES ============ */}
       <section id="about" className="mx-auto max-w-6xl px-5 py-20 sm:px-8 md:py-28">
-        <h2 className="max-w-xl font-heading text-4xl font-semibold tracking-tight">
-          ข้อมูลที่เชื่อถือได้ เขียนโดยคนรักปลาจริงๆ
-        </h2>
-        <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-3">
-          {[
-            { n: "01", t: "รีวิวจากการใช้จริง", d: "เราทดลองและคัดอุปกรณ์ก่อนแนะนำ ไม่ใช่แค่ก๊อปสเปกมาวาง" },
-            { n: "02", t: "เข้าใจง่ายสำหรับมือใหม่", d: "อธิบายทีละขั้น ไม่ใช้ศัพท์ยาก ทำตามได้แม้ไม่เคยเลี้ยงมาก่อน" },
-            { n: "03", t: "อัปเดตต่อเนื่อง", d: "มีบทความและรีวิวใหม่เพิ่มเรื่อยๆ ตามของและเทคนิคใหม่ในตลาด" },
-          ].map((v) => (
-            <div key={v.n} className="bg-background p-8">
-              <span className="index-num text-2xl font-medium">{v.n}</span>
-              <h3 className="mt-4 font-heading text-xl font-semibold">{v.t}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{v.d}</p>
-            </div>
-          ))}
-        </div>
+        <Reveal>
+          <h2 className="max-w-xl font-heading text-4xl font-semibold tracking-tight">
+            ข้อมูลที่เชื่อถือได้ เขียนโดยคนรักปลาจริงๆ
+          </h2>
+          <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-3">
+            {[
+              { n: "01", t: "รีวิวจากการใช้จริง", d: "เราทดลองและคัดอุปกรณ์ก่อนแนะนำ ไม่ใช่แค่ก๊อปสเปกมาวาง" },
+              { n: "02", t: "เข้าใจง่ายสำหรับมือใหม่", d: "อธิบายทีละขั้น ไม่ใช้ศัพท์ยาก ทำตามได้แม้ไม่เคยเลี้ยงมาก่อน" },
+              { n: "03", t: "อัปเดตต่อเนื่อง", d: "มีบทความและรีวิวใหม่เพิ่มเรื่อยๆ ตามของและเทคนิคใหม่ในตลาด" },
+            ].map((v) => (
+              <div key={v.n} className="bg-background p-8">
+                <span className="index-num text-2xl font-medium">{v.n}</span>
+                <h3 className="mt-4 font-heading text-xl font-semibold">{v.t}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{v.d}</p>
+              </div>
+            ))}
+          </div>
+        </Reveal>
       </section>
 
       {/* ============ CLOSING CTA (ไม่มีฟอร์ม/อีเมล — เป็นแค่ลิงก์ไปคู่มือ ตามจุดยืน privacy) ============ */}
       <section className="mx-auto max-w-6xl px-5 pb-8 sm:px-8">
-        <div className="relative overflow-hidden rounded-3xl bg-primary px-6 py-16 text-center text-primary-foreground sm:px-12">
-          <div aria-hidden className="dot-light pointer-events-none absolute inset-0 opacity-20" />
-          <div className="relative">
-            <h2 className="mx-auto max-w-xl font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-              อยากเลี้ยงปลากัดให้สวยและแข็งแรง?
-            </h2>
-            <p className="mx-auto mt-4 max-w-md text-primary-foreground/80">
-              เริ่มจากคู่มือจัดตู้ฉบับสมบูรณ์ แล้วต่อด้วยเรื่องเครื่องกรองและการให้อาหาร —
-              อ่านฟรีครบทุกบทความ ไม่ต้องสมัครอะไรทั้งนั้น
-            </p>
-            <Link
-              href="/articles/setup-betta-tank"
-              className="mx-auto mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-foreground px-7 py-3 text-sm font-medium text-background transition-colors hover:bg-betta hover:text-betta-foreground"
-            >
-              อ่านคู่มือเริ่มต้น <span aria-hidden>→</span>
-            </Link>
+        <Reveal>
+          <div className="relative overflow-hidden rounded-3xl bg-primary px-6 py-16 text-center text-primary-foreground sm:px-12">
+            <div aria-hidden className="dot-light pointer-events-none absolute inset-0 opacity-20" />
+            <div className="relative">
+              <h2 className="mx-auto max-w-xl font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
+                อยากเลี้ยงปลากัดให้สวยและแข็งแรง?
+              </h2>
+              <p className="mx-auto mt-4 max-w-md text-primary-foreground/80">
+                เริ่มจากคู่มือจัดตู้ฉบับสมบูรณ์ แล้วต่อด้วยเรื่องเครื่องกรองและการให้อาหาร —
+                อ่านฟรีครบทุกบทความ ไม่ต้องสมัครอะไรทั้งนั้น
+              </p>
+              <Link
+                href="/articles/setup-betta-tank"
+                className="mx-auto mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-foreground px-7 py-3 text-sm font-medium text-background transition-colors hover:bg-betta hover:text-betta-foreground"
+              >
+                อ่านคู่มือเริ่มต้น <span aria-hidden>→</span>
+              </Link>
+            </div>
           </div>
-        </div>
+        </Reveal>
       </section>
     </>
   );
