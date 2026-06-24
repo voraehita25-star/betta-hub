@@ -24,7 +24,9 @@ const csp = [
   // ปล่อย 'unsafe-inline' ใน script-src — trade-off: ตัดต้องใช้ middleware ที่เสีย static caching
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   `connect-src 'self'${isDev ? " ws:" : ""}`,
-  "worker-src 'self' blob:",
+  // ฮีโร่ 3D (r3f/drei: Float/Environment/Lightformer + meshPhysicalMaterial) ไม่ spawn web worker ใดๆ
+  // จึงตัด blob: ออก (ลด attack surface) — เพิ่มกลับเมื่อมี loader ที่ใช้ worker จริง (Draco/KTX2/Splat)
+  "worker-src 'self'",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

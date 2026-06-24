@@ -23,6 +23,8 @@ export type AffiliatePick = {
 };
 
 export const AFFILIATE: Record<string, AffiliatePick> = {
+  // หมายเหตุ: key คงไว้เป็น "betta-tank-5l" เพราะใช้เป็น Shopee sub-id ในรายงานคอนเวอร์ชันแล้ว
+  // (เปลี่ยนชื่อจะทำให้สถิติเดิมขาดช่วง) — สินค้าจริงคือตู้นาโน ~8.4 ลิตร (26×17×19 ซม.)
   "betta-tank-5l": {
     name: "ตู้ปลานาโนหน้าโค้ง 10 นิ้ว",
     price: "350 บาท",
