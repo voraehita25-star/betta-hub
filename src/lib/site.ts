@@ -4,10 +4,15 @@ export const SITE_NAME = "BettaHub";
 // ลำดับความสำคัญ: ค่าที่ตั้งเองชัดเจน > โดเมน preview ของ Vercel > localhost (dev)
 export function getSiteUrl(): string {
   // ตั้งค่าเองเสมอใน production จริง เช่น https://www.bettahub.com
-  // บน Vercel preview/deploy ที่ไม่ได้ตั้ง NEXT_PUBLIC_SITE_URL — VERCEL_URL ไม่มี protocol
+  // ลำดับ fallback บน Vercel (สำคัญต่อ canonical/OG/sitemap):
+  //   VERCEL_PROJECT_PRODUCTION_URL = โดเมน production ที่ "เสถียร" → ปลอดภัยใช้เป็น canonical ของ prod
+  //   VERCEL_URL = โดเมนต่อ deployment ที่เปลี่ยนทุกครั้ง → ใช้ได้เฉพาะ preview (ห้ามเป็น canonical ของ prod
+  //   ไม่งั้นจะเกิด duplicate-content ชี้ไป hostname ชั่วคราว)
+  const vercelHost =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
   const raw =
     process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+    (vercelHost ? `https://${vercelHost}` : "http://localhost:3000");
   // ตัด trailing slash กัน `//` ซ้อนเวลาเอาไปต่อ path ใน sitemap/robots/JSON-LD
   return raw.replace(/\/+$/, "");
 }

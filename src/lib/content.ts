@@ -115,7 +115,8 @@ export const articles: Article[] = [
   },
 ];
 
-export function getArticle(slug: string): Article | undefined {
+// ภายในโมดูลเท่านั้น — หน้าเพจใช้ getArticleOrThrow/getAdjacentArticles (ไม่เผยตัวที่คืน undefined ออกไป)
+function getArticle(slug: string): Article | undefined {
   return articles.find((a) => a.slug === slug);
 }
 
@@ -151,6 +152,14 @@ export function buildArticleMetadata(
       description: ogDescription,
       publishedTime: `${article.date}T00:00:00.000Z`,
       authors: [article.author],
+      images: [article.image],
+    },
+    // ตั้ง twitter ต่อหน้าด้วย — Next 16 merge metadata แบบ shallow: ถ้าลูกไม่ตั้ง twitter
+    // จะ "สืบทอด" twitter ของ root (การ์ดหน้าแรก) ทั้งก้อน ทำให้แชร์บทความบน X ขึ้นการ์ดหน้าแรก
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: ogDescription,
       images: [article.image],
     },
   };

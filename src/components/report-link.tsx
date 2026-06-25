@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { ReportReason } from "@/lib/reports";
 
 // แสดงปุ่มเฉพาะเมื่อเปิดฟีเจอร์ (กันปุ่มเสียก่อนต่อ Vercel Blob store)
@@ -28,20 +28,31 @@ export function ReportLink({ productName }: { productName: string }) {
   const panelId = useId();
   const btnRef = useRef<HTMLButtonElement>(null);
   const firstFieldRef = useRef<HTMLInputElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
 
-  // เปิดแล้วโฟกัสตัวเลือกแรก; ปิดด้วย Esc แล้วคืนโฟกัสปุ่ม (WCAG 2.4.3)
+  // ปิดแผง: รีเซ็ตสถานะ transient ทุกครั้ง (กันเปิดใหม่แล้วยังค้างหน้า "ขอบคุณ"/ข้อความ error เก่า) + คืนโฟกัสปุ่ม
+  const close = useCallback(() => {
+    setOpen(false);
+    setStatus("idle");
+    setMsg("");
+    btnRef.current?.focus();
+  }, []);
+
+  // เปิดแล้วโฟกัสตัวเลือกแรก; ปิดด้วย Esc (WCAG 2.4.3)
   useEffect(() => {
     if (!open) return;
     firstFieldRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-        btnRef.current?.focus();
-      }
+      if (e.key === "Escape") close();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, close]);
+
+  // ส่งสำเร็จ → ย้ายโฟกัสเข้าปุ่ม "ปิด" ในแผงขอบคุณ (ปุ่ม submit เดิมถูก unmount; WCAG 2.4.3)
+  useEffect(() => {
+    if (status === "ok") closeBtnRef.current?.focus();
+  }, [status]);
 
   if (!ENABLED) return null;
 
@@ -88,7 +99,7 @@ export function ReportLink({ productName }: { productName: string }) {
         type="button"
         aria-expanded={open}
         aria-controls={panelId}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => (open ? close() : setOpen(true))}
         className="text-xs text-muted-foreground underline-offset-2 hover:text-destructive hover:underline"
       >
         แจ้งลิงก์เสีย/สินค้าหมด
@@ -100,14 +111,12 @@ export function ReportLink({ productName }: { productName: string }) {
           className="absolute left-0 top-7 z-30 w-72 rounded-xl border border-border bg-card p-4 text-left shadow-lg"
         >
           {status === "ok" ? (
-            <div>
+            <div role="status" aria-live="polite">
               <p className="text-sm text-foreground">{msg}</p>
               <button
+                ref={closeBtnRef}
                 type="button"
-                onClick={() => {
-                  setOpen(false);
-                  btnRef.current?.focus();
-                }}
+                onClick={close}
                 className="mt-3 text-xs font-medium text-betta underline-offset-2 hover:underline"
               >
                 ปิด
@@ -173,10 +182,7 @@ export function ReportLink({ productName }: { productName: string }) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setOpen(false);
-                    btnRef.current?.focus();
-                  }}
+                  onClick={close}
                   className="text-xs text-muted-foreground hover:text-foreground"
                 >
                   ยกเลิก
