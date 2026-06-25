@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_NAME, imageDims } from "@/lib/site";
 
 export type Category = {
   index: string;
@@ -142,10 +142,19 @@ export function buildArticleMetadata(
   ogDescription: string = description,
 ): Metadata {
   const article = getArticleOrThrow(slug);
+  const dims = imageDims(article.image);
+  const ogImage = {
+    url: article.image,
+    alt: article.imageAlt,
+    ...(dims ? { width: dims.w, height: dims.h } : {}),
+  };
   return {
     title: article.title,
     description,
-    alternates: { canonical: `/articles/${article.slug}` },
+    alternates: {
+      canonical: `/articles/${article.slug}`,
+      types: { "application/rss+xml": "/feed.xml" },
+    },
     openGraph: {
       type: "article",
       locale: "th_TH",
@@ -153,8 +162,10 @@ export function buildArticleMetadata(
       title: article.title,
       description: ogDescription,
       publishedTime: `${article.date}T00:00:00.000Z`,
+      modifiedTime: `${article.updated ?? article.date}T00:00:00.000Z`,
+      section: article.category,
       authors: [article.author],
-      images: [article.image],
+      images: [ogImage],
     },
     // ตั้ง twitter ต่อหน้าด้วย — Next 16 merge metadata แบบ shallow: ถ้าลูกไม่ตั้ง twitter
     // จะ "สืบทอด" twitter ของ root (การ์ดหน้าแรก) ทั้งก้อน ทำให้แชร์บทความบน X ขึ้นการ์ดหน้าแรก
@@ -162,7 +173,7 @@ export function buildArticleMetadata(
       card: "summary_large_image",
       title: article.title,
       description: ogDescription,
-      images: [article.image],
+      images: [{ url: article.image, alt: article.imageAlt }],
     },
   };
 }

@@ -1,9 +1,17 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { trirong, anuphan } from "@/app/fonts";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { getSiteUrl } from "@/lib/site";
+
+// โทเค็นยืนยันความเป็นเจ้าของเว็บ — ตั้งใน Vercel env (Production) เมื่อสมัคร Search Console / Bing
+// ปล่อยว่าง = ไม่ emit meta (preview ก็ noindex อยู่แล้ว) → ปลอดภัยที่จะ ship ไว้ก่อน
+const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+const bingVerification = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION;
+
+// theme-color ของแถบ browser บนมือถือ = สี --background (oklch(0.163 0.013 240)) แปลงเป็น hex
+export const viewport: Viewport = { themeColor: "#090f13" };
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
@@ -36,6 +44,10 @@ export const metadata: Metadata = {
     title: "BettaHub — ครบเรื่องปลากัด ตู้ปลา และอุปกรณ์",
     description: "คู่มือเลี้ยงปลากัดสำหรับมือใหม่ + รีวิวอุปกรณ์ตู้ปลาคุ้มราคา",
     images: ["/images/hero.jpg"],
+  },
+  verification: {
+    ...(googleVerification ? { google: googleVerification } : {}),
+    ...(bingVerification ? { other: { "msvalidate.01": bingVerification } } : {}),
   },
 };
 

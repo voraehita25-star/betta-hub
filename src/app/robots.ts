@@ -12,8 +12,10 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: "/dev/", // หน้าเครื่องมือ dev — ไม่ให้ index (คู่กับ noindex ในหน้า)
+      // /dev/ = หน้าเครื่องมือ dev (noindex อยู่แล้ว); /api/ = route แบบ dynamic ไม่ควร index → ตัด crawl ทิ้ง
+      disallow: ["/dev/", "/api/"],
     },
     sitemap: `${base}/sitemap.xml`,
+    host: base,
   };
 }

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getSiteUrl } from "@/lib/site";
+import { breadcrumbJsonLd } from "@/lib/jsonld";
+import { JsonLd } from "@/components/json-ld";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { WaterChangeTool } from "@/components/water-change-tool";
 
@@ -28,8 +31,28 @@ export const metadata: Metadata = {
 };
 
 export default function WaterChangePage() {
+  const base = getSiteUrl();
   return (
     <div className="mx-auto max-w-3xl px-5 py-14 sm:px-8">
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "หน้าแรก", path: "/" },
+          { name: "เครื่องคำนวณเปลี่ยนน้ำ", path: "/tools/water-change" },
+        ])}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "เครื่องคำนวณเปลี่ยนน้ำตู้ปลากัด",
+          url: `${base}/tools/water-change`,
+          applicationCategory: "UtilitiesApplication",
+          operatingSystem: "Web",
+          inLanguage: "th-TH",
+          isAccessibleForFree: true,
+          offers: { "@type": "Offer", price: "0", priceCurrency: "THB" },
+        }}
+      />
       <Breadcrumb current="เครื่องมือ" />
       <h1 className="mt-6 font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
         เครื่องคำนวณเปลี่ยนน้ำ

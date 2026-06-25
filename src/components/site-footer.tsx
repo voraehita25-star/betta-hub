@@ -11,7 +11,7 @@ const COLS = [
     title: "เกี่ยวกับ",
     links: [
       { label: "เกี่ยวกับเรา", href: "/#about" },
-      { label: "บทความทั้งหมด", href: "/#articles" },
+      { label: "บทความทั้งหมด", href: "/articles" },
       { label: "เครื่องคำนวณเปลี่ยนน้ำ", href: "/tools/water-change" },
       { label: "นโยบายความเป็นส่วนตัว", href: "/privacy" },
     ],

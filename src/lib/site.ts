@@ -1,4 +1,6 @@
 export const SITE_NAME = "BettaHub";
+// ผู้ดูแล/ผู้เขียนเว็บ (บุคคลคนเดียวตามจุดยืน honesty — ไม่ใช่องค์กร) ใช้ใน JSON-LD author/publisher
+export const SITE_AUTHOR = "ผู้ดูแล BettaHub";
 
 // อ่านโดเมนจาก env เพื่อแยก dev / preview / prod
 // ลำดับความสำคัญ: ค่าที่ตั้งเองชัดเจน > โดเมน preview ของ Vercel > localhost (dev)
@@ -15,6 +17,21 @@ export function getSiteUrl(): string {
     (vercelHost ? `https://${vercelHost}` : "http://localhost:3000");
   // ตัด trailing slash กัน `//` ซ้อนเวลาเอาไปต่อ path ใน sitemap/robots/JSON-LD
   return raw.replace(/\/+$/, "");
+}
+
+// ขนาดจริง (พิกเซล) ของรูปปกที่ใช้ใน OG/JSON-LD — ช่วยให้การ์ดแชร์ครอปถูก & ImageObject ผ่าน validation
+// (อัปเดตเมื่อเปลี่ยนไฟล์รูป — เลขนี้คือขนาดจริงของไฟล์ใน public/images)
+const IMAGE_DIMS: Record<string, { w: number; h: number }> = {
+  "/images/hero.jpg": { w: 1800, h: 1200 },
+  "/images/tank.jpg": { w: 1100, h: 733 },
+  "/images/betta-red.jpg": { w: 1100, h: 880 },
+  "/images/aquarium.jpg": { w: 1100, h: 686 },
+  "/images/care.jpg": { w: 1100, h: 731 },
+};
+
+/** ขนาดจริงของรูป (ถ้ารู้) สำหรับใส่ใน og:image / schema.org ImageObject */
+export function imageDims(path: string): { w: number; h: number } | undefined {
+  return IMAGE_DIMS[path];
 }
 
 const TH_MONTHS = [
