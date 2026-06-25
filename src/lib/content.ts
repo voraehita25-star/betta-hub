@@ -19,6 +19,8 @@ export type Article = {
   imageAlt: string;
   readMin: number;
   date: string;
+  /** วันที่แก้ไขล่าสุด (YYYY-MM-DD) — ใส่เมื่อแก้เนื้อหาบทความเดิม เพื่อให้ dateModified ใน JSON-LD สดจริง; ไม่ใส่ = ใช้ date */
+  updated?: string;
   author: string;
   /** true = มีหน้าบทความจริงให้คลิกอ่าน */
   available: boolean;

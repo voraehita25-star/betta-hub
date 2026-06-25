@@ -2,6 +2,31 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
+// IntersectionObserver ตัวเดียวใช้ร่วมทุก <Reveal> (เดิมสร้าง 1 ตัว/instance → ~17 ตัวบนหน้าแรก)
+// map element → callback ผ่าน WeakMap เพื่อ resolve เป้าหมายตอน intersect แล้ว unobserve ทิ้ง
+let sharedObserver: IntersectionObserver | null = null;
+const revealCallbacks = new WeakMap<Element, () => void>();
+let jsRevealMarked = false;
+
+function getRevealObserver(): IntersectionObserver | null {
+  if (typeof IntersectionObserver === "undefined") return null;
+  sharedObserver ??= new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const cb = revealCallbacks.get(entry.target);
+        if (cb) {
+          cb();
+          revealCallbacks.delete(entry.target);
+          sharedObserver?.unobserve(entry.target);
+        }
+      }
+    },
+    { rootMargin: "0px 0px -8% 0px", threshold: 0.05 },
+  );
+  return sharedObserver;
+}
+
 /**
  * Scroll-reveal wrapper — เนื้อหาค่อยๆ จางขึ้น+เลื่อนขึ้นเมื่อเลื่อนถึง (premium feel)
  *
@@ -38,23 +63,20 @@ export function Reveal({
       return;
     }
 
-    // เปิดสถานะ "ซ่อนก่อนเผย" เฉพาะเมื่อ JS ทำงานจริง — no-JS users จะเห็นเนื้อหาตามปกติ
-    document.documentElement.classList.add("js-reveal");
+    // เปิดสถานะ "ซ่อนก่อนเผย" ครั้งเดียว เฉพาะเมื่อ JS ทำงานจริง — no-JS users จะเห็นเนื้อหาตามปกติ
+    if (!jsRevealMarked) {
+      document.documentElement.classList.add("js-reveal");
+      jsRevealMarked = true;
+    }
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setShown(true);
-            io.disconnect();
-            break;
-          }
-        }
-      },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.05 },
-    );
+    const io = getRevealObserver();
+    if (!io) return;
+    revealCallbacks.set(el, () => setShown(true));
     io.observe(el);
-    return () => io.disconnect();
+    return () => {
+      revealCallbacks.delete(el);
+      io.unobserve(el);
+    };
   }, []);
 
   return (

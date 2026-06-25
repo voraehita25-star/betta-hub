@@ -2,11 +2,29 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/breadcrumb";
 
+const PRIVACY_OG_DESC =
+  "นโยบายความเป็นส่วนตัวของ BettaHub — เก็บข้อมูลให้น้อยที่สุดและโปร่งใส ตามแนวทาง PDPA";
+
 export const metadata: Metadata = {
   title: "นโยบายความเป็นส่วนตัว",
   description:
     "นโยบายความเป็นส่วนตัวของ BettaHub — เว็บคอนเทนต์เรื่องปลากัดที่ดูแลโดยบุคคลคนเดียว อธิบายข้อมูลที่เก็บ การใช้คุกกี้และเครื่องมือวิเคราะห์ ลิงก์พันธมิตร และสิทธิของผู้ใช้ตาม PDPA",
   alternates: { canonical: "/privacy" },
+  // ตั้ง og/twitter ของหน้าเอง — ไม่งั้นจะสืบทอด og หน้าแรกทั้งก้อน (การ์ดแชร์ขัดกับ <title> ของหน้านี้)
+  openGraph: {
+    type: "website",
+    locale: "th_TH",
+    siteName: "BettaHub",
+    title: "นโยบายความเป็นส่วนตัว · BettaHub",
+    description: PRIVACY_OG_DESC,
+    images: ["/images/hero.jpg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "นโยบายความเป็นส่วนตัว · BettaHub",
+    description: PRIVACY_OG_DESC,
+    images: ["/images/hero.jpg"],
+  },
 };
 
 export default function PrivacyPage() {
