@@ -17,35 +17,31 @@ function Bubble({
   color,
   speed,
   segments,
-  glass,
 }: {
   position: [number, number, number];
   scale: number;
   color: string;
   speed: number;
   segments: number;
-  /** เปิด transmission (กระจกใส) เฉพาะเดสก์ท็อป — บนมือถือปิดเพื่อตัด render pass พิเศษทุกเฟรม */
-  glass: boolean;
 }) {
+  // M3: ตัด transmission ออก — เดิม transmission>0 บังคับ three.js เรนเดอร์ scene ลง transmission render target
+  // ทุกเฟรม (≈เบิ้ลต้นทุนต่อเฟรม = ตัวการหลักของ GPU/INP) คงลุค "แก้ว" ด้วย clearcoat (สะท้อน Environment)
+  // + alpha โปร่งแสง ซึ่งถูกกว่ามากและไม่ต้องมี render pass พิเศษ
   return (
     <Float speed={speed * 2} rotationIntensity={1} floatIntensity={1.1}>
       <mesh position={position} scale={scale}>
         <sphereGeometry args={[1, segments, segments]} />
         <meshPhysicalMaterial
           color={color}
-          transmission={glass ? 0.92 : 0}
-          thickness={glass ? 1.1 : 0}
-          roughness={0.08}
+          roughness={0.12}
           metalness={0}
           ior={1.4}
           clearcoat={1}
-          clearcoatRoughness={0.08}
-          attenuationColor={color}
-          attenuationDistance={1.4}
+          clearcoatRoughness={0.1}
           emissive={color}
-          emissiveIntensity={0.12}
+          emissiveIntensity={0.15}
           transparent
-          opacity={0.92}
+          opacity={0.82}
         />
       </mesh>
     </Float>
@@ -57,13 +53,11 @@ function Scene({
   reduced,
   count,
   segments,
-  glass,
 }: {
   mouse: Mouse;
   reduced: boolean;
   count: number;
   segments: number;
-  glass: boolean;
 }) {
   const group = useRef<THREE.Group>(null);
 
@@ -112,7 +106,6 @@ function Scene({
           color={b.color}
           speed={b.speed}
           segments={segments}
-          glass={glass}
         />
       ))}
     </group>
@@ -154,7 +147,9 @@ export default function HeroCanvas() {
   // ปรับคุณภาพตามอุปกรณ์: มือถือเบาลง (ลด segments/จำนวนฟอง/dpr) เดสก์ท็อปคงความสวย
   const segments = isMobile ? 24 : 32;
   const count = isMobile ? 6 : 9;
-  const dpr: [number, number] = isMobile ? [1, 1.5] : [1, 2];
+  // M3: cap desktop dpr ที่ 1.5 (เดิม 2) — ลดจำนวนพิกเซลที่ต้อง shade ต่อเฟรม ~44% บนจอ HiDPI
+  // (พื้นหลัง decorative ที่เบลอ/เคลื่อนไหว แทบไม่เห็นความต่างของความคม)
+  const dpr: [number, number] = [1, 1.5];
 
   // reduced-motion → เรนเดอร์ครั้งเดียวแบบนิ่ง, นอกจอ → หยุด, ปกติ → เล่นต่อเนื่อง
   const frameloop = reduced ? "demand" : visible ? "always" : "never";
@@ -192,7 +187,7 @@ export default function HeroCanvas() {
             scale={[10, 6, 1]}
           />
         </Environment>
-        <Scene mouse={mouse} reduced={reduced} count={count} segments={segments} glass={!isMobile} />
+        <Scene mouse={mouse} reduced={reduced} count={count} segments={segments} />
       </Canvas>
     </div>
   );
