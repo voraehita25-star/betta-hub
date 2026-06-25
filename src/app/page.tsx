@@ -152,7 +152,7 @@ export default function Home() {
                 </TiltCard>
                 <h3 className="mt-4 flex items-center gap-2 font-heading text-lg font-semibold">
                   {c.name}
-                  <span className="text-betta opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
+                  <span aria-hidden className="text-betta opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
                     →
                   </span>
                 </h3>
@@ -246,7 +246,8 @@ export default function Home() {
                     {inner}
                   </Link>
                 ) : (
-                  <div className="group flex cursor-default flex-col opacity-70">{inner}</div>
+                  // หรี่เฉพาะรูป (ไม่หรี่ข้อความ) — กัน text-muted-foreground ตก contrast ต่ำกว่า 4.5:1; badge "เร็วๆ นี้" สื่อสถานะแล้ว
+                  <div className="group flex cursor-default flex-col [&_img]:opacity-50">{inner}</div>
                 )}
               </Reveal>
             );

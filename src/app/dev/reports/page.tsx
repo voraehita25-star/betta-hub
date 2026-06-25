@@ -45,8 +45,9 @@ export default async function DevReportsPage({
         </p>
       ) : !(await isDevAuthed()) ? (
         <form action={loginAction} className="mt-8 max-w-sm">
-          <label className="block text-sm font-medium">รหัสผ่าน dev</label>
+          <label htmlFor="dev-token" className="block text-sm font-medium">รหัสผ่าน dev</label>
           <input
+            id="dev-token"
             type="password"
             name="token"
             autoComplete="off"

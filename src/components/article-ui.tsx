@@ -2,9 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useId } from "react";
 import { formatThaiDate } from "@/lib/site";
-import { getAdjacentArticles } from "@/lib/content";
+import { getAdjacentArticles, type Article } from "@/lib/content";
 import { faqJsonLd } from "@/lib/jsonld";
 import { affiliateHref } from "@/lib/affiliate";
+import { Breadcrumb } from "@/components/breadcrumb";
 import { JsonLd } from "@/components/json-ld";
 import { ProductGallery, type ProductImage } from "@/components/product-gallery";
 import { ReportLink } from "@/components/report-link";
@@ -16,51 +17,31 @@ const safeHref = (u: string | undefined): string | undefined =>
   u && u.startsWith("https://") ? u : undefined;
 
 /** ส่วนหัวบทความ: breadcrumb + หมวด + ชื่อเรื่อง + บรรทัดผู้เขียน/วันที่/เวลาอ่าน + รูปปก */
-export function ArticleHeader({
-  category,
-  title,
-  date,
-  readMin,
-  author,
-  coverImage,
-  coverAlt,
-}: {
-  category: string;
-  title: string;
-  date: string;
-  readMin: number;
-  author: string;
-  coverImage: string;
-  coverAlt: string;
-}) {
+export function ArticleHeader({ article }: { article: Article }) {
   return (
     <>
       <header className="mx-auto max-w-3xl px-5 pt-14 sm:px-8">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-betta">หน้าแรก</Link>
-          <span aria-hidden>/</span>
-          <span className="text-foreground/70">{category}</span>
-        </div>
+        <Breadcrumb current={article.category} />
         <span className="mt-6 inline-block text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-betta">
-          {category}
+          {article.category}
         </span>
         <h1 className="mt-3 font-heading text-4xl font-semibold leading-[1.15] tracking-tight sm:text-5xl">
-          {title}
+          {article.title}
         </h1>
         <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-          <span>โดย {author}</span>
+          <span>โดย {article.author}</span>
           <span className="text-border" aria-hidden>·</span>
-          <time dateTime={date}>{formatThaiDate(date)}</time>
+          <time dateTime={article.date}>{formatThaiDate(article.date)}</time>
           <span className="text-border" aria-hidden>·</span>
-          <span>อ่าน {readMin} นาที</span>
+          <span>อ่าน {article.readMin} นาที</span>
         </div>
       </header>
 
       <div className="mx-auto mt-8 max-w-5xl px-5 sm:px-8">
         <div className="relative aspect-[16/9] overflow-hidden rounded-2xl">
           <Image
-            src={coverImage}
-            alt={coverAlt}
+            src={article.image}
+            alt={article.imageAlt}
             fill
             preload
             sizes="(max-width: 1024px) 100vw, 960px"

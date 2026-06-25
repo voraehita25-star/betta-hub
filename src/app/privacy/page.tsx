@@ -1,21 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Breadcrumb } from "@/components/breadcrumb";
+
+const PRIVACY_OG_DESC =
+  "นโยบายความเป็นส่วนตัวของ BettaHub — เก็บข้อมูลให้น้อยที่สุดและโปร่งใส ตามแนวทาง PDPA";
 
 export const metadata: Metadata = {
   title: "นโยบายความเป็นส่วนตัว",
   description:
     "นโยบายความเป็นส่วนตัวของ BettaHub — เว็บคอนเทนต์เรื่องปลากัดที่ดูแลโดยบุคคลคนเดียว อธิบายข้อมูลที่เก็บ การใช้คุกกี้และเครื่องมือวิเคราะห์ ลิงก์พันธมิตร และสิทธิของผู้ใช้ตาม PDPA",
   alternates: { canonical: "/privacy" },
+  // ตั้ง og/twitter ของหน้าเอง — ไม่งั้นจะสืบทอด og หน้าแรกทั้งก้อน (การ์ดแชร์ขัดกับ <title> ของหน้านี้)
+  openGraph: {
+    type: "website",
+    locale: "th_TH",
+    siteName: "BettaHub",
+    title: "นโยบายความเป็นส่วนตัว · BettaHub",
+    description: PRIVACY_OG_DESC,
+    images: ["/images/hero.jpg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "นโยบายความเป็นส่วนตัว · BettaHub",
+    description: PRIVACY_OG_DESC,
+    images: ["/images/hero.jpg"],
+  },
 };
 
 export default function PrivacyPage() {
   return (
     <article className="mx-auto max-w-3xl px-5 py-14 sm:px-8">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link href="/" className="hover:text-betta">หน้าแรก</Link>
-        <span aria-hidden>/</span>
-        <span className="text-foreground/70">นโยบายความเป็นส่วนตัว</span>
-      </div>
+      <Breadcrumb current="นโยบายความเป็นส่วนตัว" />
       <h1 className="mt-6 font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
         นโยบายความเป็นส่วนตัว
       </h1>

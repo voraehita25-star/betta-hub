@@ -1,23 +1,9 @@
 import type { Metadata } from "next";
-import { Trirong, Anuphan } from "next/font/google";
 import "./globals.css";
+import { trirong, anuphan } from "@/app/fonts";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { getSiteUrl } from "@/lib/site";
-
-const trirong = Trirong({
-  subsets: ["latin", "thai"],
-  weight: ["400", "500", "600"],
-  variable: "--font-trirong",
-  display: "swap",
-});
-
-const anuphan = Anuphan({
-  subsets: ["latin", "thai"],
-  weight: ["300", "400", "500", "600"],
-  variable: "--font-anuphan",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),

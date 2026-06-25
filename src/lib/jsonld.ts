@@ -10,6 +10,7 @@ export function articleJsonLd(article: Article) {
   const base = getSiteUrl();
   const url = `${base}/articles/${article.slug}`;
   const published = `${article.date}T00:00:00.000Z`;
+  const modified = article.updated ? `${article.updated}T00:00:00.000Z` : published;
   return {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -20,7 +21,7 @@ export function articleJsonLd(article: Article) {
       url: `${base}${article.image}`,
     },
     datePublished: published,
-    dateModified: published,
+    dateModified: modified,
     inLanguage: "th-TH",
     author: { "@type": "Person", name: article.author },
     publisher: { "@type": "Person", name: article.author },

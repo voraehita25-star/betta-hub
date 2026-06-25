@@ -22,15 +22,7 @@ export default function Article() {
   return (
     <article>
       <JsonLd data={articleJsonLd(article)} />
-      <ArticleHeader
-        category={article.category}
-        title={article.title}
-        date={article.date}
-        readMin={article.readMin}
-        author={article.author}
-        coverImage={article.image}
-        coverAlt={article.imageAlt}
-      />
+      <ArticleHeader article={article} />
 
       <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8">
         <div className="article-prose">

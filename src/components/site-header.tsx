@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import type { MouseEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FishMark } from "@/components/fish-mark";
@@ -14,30 +14,19 @@ const NAV = [
   { label: "ให้อาหาร", href: "/articles/feeding-betta" },
 ];
 
-export function SiteHeader() {
-  const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-  const toggleRef = useRef<HTMLButtonElement>(null);
+// ปิดเมนู <details> หลังคลิกลิงก์ (เมื่อมี JS) — ถ้าไม่มี JS การนำทางจะรีโหลดหน้า แล้ว <details> รีเซ็ตเป็นปิดเอง
+function closeMenu(e: MouseEvent<HTMLAnchorElement>) {
+  e.currentTarget.closest("details")?.removeAttribute("open");
+}
 
-  // ปิดเมนูมือถือด้วยปุ่ม Escape แล้วคืน focus กลับปุ่ม toggle
-  // (WCAG 2.4.3 — ไม่งั้น focus จะตกไปที่ <body> หลังเมนูหาย)
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-        toggleRef.current?.focus();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+export function SiteHeader() {
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
         {/* Wordmark */}
-        <Link href="/" className="group flex items-center gap-2.5" onClick={() => setOpen(false)}>
+        <Link href="/" className="group flex items-center gap-2.5">
           <span className="text-betta transition-transform duration-300 group-hover:-translate-y-0.5">
             <FishMark className="h-6 w-9" />
           </span>
@@ -71,48 +60,47 @@ export function SiteHeader() {
           </Link>
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          ref={toggleRef}
-          className="flex h-11 w-11 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
-          aria-label={open ? "ปิดเมนู" : "เปิดเมนู"}
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-          onClick={() => setOpen((v) => !v)}
-        >
-          <div className="space-y-1.5">
-            <span className={`block h-0.5 w-6 bg-current transition-transform ${open ? "translate-y-2 rotate-45" : ""}`} />
-            <span className={`block h-0.5 w-6 bg-current transition-opacity ${open ? "opacity-0" : ""}`} />
-            <span className={`block h-0.5 w-6 bg-current transition-transform ${open ? "-translate-y-2 -rotate-45" : ""}`} />
-          </div>
-        </button>
-      </div>
+        {/* Mobile menu — ใช้ <details> เพื่อให้เปิดได้แม้ไม่มี JS (no-JS safe; เดิมผูก React state จึงเปิดไม่ได้ถ้าปิด JS) */}
+        <details className="group/menu md:hidden">
+          <summary
+            aria-label="เมนู"
+            className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden"
+          >
+            <div className="space-y-1.5">
+              <span className="block h-0.5 w-6 bg-current transition-transform duration-300 group-open/menu:translate-y-2 group-open/menu:rotate-45" />
+              <span className="block h-0.5 w-6 bg-current transition-opacity duration-300 group-open/menu:opacity-0" />
+              <span className="block h-0.5 w-6 bg-current transition-transform duration-300 group-open/menu:-translate-y-2 group-open/menu:-rotate-45" />
+            </div>
+          </summary>
 
-      {/* Mobile panel */}
-      {open && (
-        <nav id="mobile-menu" className="border-t border-border bg-background px-5 py-4 md:hidden">
-          <div className="flex flex-col gap-1">
-            {NAV.map((item) => (
+          {/* Panel — absolute เต็มความกว้าง header ใต้แถบ (header เป็น sticky จึงเป็น positioning context) */}
+          <nav
+            id="mobile-menu"
+            className="absolute inset-x-0 top-16 border-t border-border bg-background px-5 py-4"
+          >
+            <div className="mx-auto flex max-w-6xl flex-col gap-1 sm:px-3">
+              {NAV.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  onClick={closeMenu}
+                  aria-current={pathname === item.href ? "page" : undefined}
+                  className="rounded-md px-3 py-2.5 text-base font-medium text-foreground/80 hover:bg-muted aria-[current=page]:text-betta"
+                >
+                  {item.label}
+                </Link>
+              ))}
               <Link
-                key={item.label}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                aria-current={pathname === item.href ? "page" : undefined}
-                className="rounded-md px-3 py-2.5 text-base font-medium text-foreground/80 hover:bg-muted aria-[current=page]:text-betta"
+                href="/articles/setup-betta-tank"
+                onClick={closeMenu}
+                className="mt-2 rounded-full bg-foreground px-4 py-2.5 text-center text-base font-medium text-background"
               >
-                {item.label}
+                เริ่มต้นที่นี่ <span aria-hidden>→</span>
               </Link>
-            ))}
-            <Link
-              href="/articles/setup-betta-tank"
-              onClick={() => setOpen(false)}
-              className="mt-2 rounded-full bg-foreground px-4 py-2.5 text-center text-base font-medium text-background"
-            >
-              เริ่มต้นที่นี่ →
-            </Link>
-          </div>
-        </nav>
-      )}
+            </div>
+          </nav>
+        </details>
+      </div>
     </header>
   );
 }
