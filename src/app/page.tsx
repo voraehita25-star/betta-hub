@@ -6,7 +6,7 @@ import { Hero3D } from "@/components/hero-3d";
 import { TiltCard } from "@/components/tilt-card";
 import { Reveal } from "@/components/reveal";
 import { JsonLd } from "@/components/json-ld";
-import { websiteJsonLd } from "@/lib/jsonld";
+import { websiteJsonLd, blogItemListJsonLd } from "@/lib/jsonld";
 import { formatThaiDate } from "@/lib/site";
 
 // ต้องมีบทความอย่างน้อย 1 ตัว — fail build แต่เนิ่น ๆ ถ้าใครลบหมด
@@ -24,13 +24,21 @@ const latest = articles
   .sort((a, b) => b.date.localeCompare(a.date));
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/" },
+  alternates: {
+    canonical: "/",
+    types: { "application/rss+xml": "/feed.xml" },
+  },
 };
 
 export default function Home() {
   return (
     <>
       <JsonLd data={websiteJsonLd()} />
+      <JsonLd
+        data={blogItemListJsonLd(
+          articles.filter((a) => a.available).map((a) => ({ title: a.title, slug: a.slug })),
+        )}
+      />
       {/* ============ HERO ============ */}
       <section className="relative overflow-hidden">
         <div aria-hidden className="dot-mask pointer-events-none absolute inset-0 z-0 opacity-[0.5]" />

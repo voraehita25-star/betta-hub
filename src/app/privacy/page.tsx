@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { breadcrumbJsonLd } from "@/lib/jsonld";
+import { JsonLd } from "@/components/json-ld";
 import { Breadcrumb } from "@/components/breadcrumb";
 
 const PRIVACY_OG_DESC =
@@ -30,6 +32,12 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <article className="mx-auto max-w-3xl px-5 py-14 sm:px-8">
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "หน้าแรก", path: "/" },
+          { name: "นโยบายความเป็นส่วนตัว", path: "/privacy" },
+        ])}
+      />
       <Breadcrumb current="นโยบายความเป็นส่วนตัว" />
       <h1 className="mt-6 font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
         นโยบายความเป็นส่วนตัว

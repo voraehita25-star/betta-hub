@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useId } from "react";
 import { formatThaiDate } from "@/lib/site";
 import { getAdjacentArticles, type Article } from "@/lib/content";
-import { faqJsonLd } from "@/lib/jsonld";
+import { breadcrumbJsonLd, faqJsonLd } from "@/lib/jsonld";
 import { affiliateHref } from "@/lib/affiliate";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { JsonLd } from "@/components/json-ld";
@@ -20,6 +20,12 @@ const safeHref = (u: string | undefined): string | undefined =>
 export function ArticleHeader({ article }: { article: Article }) {
   return (
     <>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "หน้าแรก", path: "/" },
+          { name: article.title, path: `/articles/${article.slug}` },
+        ])}
+      />
       <header className="mx-auto max-w-3xl px-5 pt-14 sm:px-8">
         <Breadcrumb current={article.category} />
         <span className="mt-6 inline-block text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-betta">

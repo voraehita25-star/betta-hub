@@ -1,11 +1,21 @@
 import type { Article } from "@/lib/content";
-import { SITE_NAME, getSiteUrl } from "@/lib/site";
+import { SITE_NAME, SITE_AUTHOR, getSiteUrl, imageDims } from "@/lib/site";
 
 // สร้าง structured data (schema.org) ให้ Google/AI เข้าใจหน้าเว็บ
 // ยึดความซื่อสัตย์: author เป็น Person ตามที่ลงชื่อจริง, ไม่ปลอม Organization/logo (ขัดหน้า privacy ที่ระบุว่าไม่ใช่องค์กร)
-// และไม่ใส่ aggregateRating/review ปลอม
+// และไม่ใส่ aggregateRating/review/HowTo ปลอม
 
-/** BlogPosting ของหน้าบทความ — image เป็น absolute URL ตาม schema.org */
+/** ImageObject แบบ absolute URL + ใส่ width/height ถ้ารู้ขนาดจริง (Google แนะนำให้มี) */
+function imageObject(path: string, base: string) {
+  const d = imageDims(path);
+  return {
+    "@type": "ImageObject",
+    url: `${base}${path}`,
+    ...(d ? { width: d.w, height: d.h } : {}),
+  };
+}
+
+/** BlogPosting ของหน้าบทความ */
 export function articleJsonLd(article: Article) {
   const base = getSiteUrl();
   const url = `${base}/articles/${article.slug}`;
@@ -16,29 +26,63 @@ export function articleJsonLd(article: Article) {
     "@type": "BlogPosting",
     headline: article.title,
     description: article.excerpt,
-    image: {
-      "@type": "ImageObject",
-      url: `${base}${article.image}`,
-    },
+    // array ของ ImageObject ตามที่ Google แนะนำ (ใส่ขนาดจริงเพื่อผ่าน validation)
+    image: [imageObject(article.image, base)],
     datePublished: published,
     dateModified: modified,
+    articleSection: article.category,
+    timeRequired: `PT${article.readMin}M`,
     inLanguage: "th-TH",
     author: { "@type": "Person", name: article.author },
     publisher: { "@type": "Person", name: article.author },
+    // เชื่อมเข้ากับ WebSite entity เดียวของเว็บ
+    isPartOf: { "@type": "WebSite", "@id": `${base}/#website` },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
     url,
   };
 }
 
-/** WebSite ของหน้าแรก */
+/** WebSite ของหน้าแรก (มี @id ให้ entity อื่นอ้างถึงได้) */
 export function websiteJsonLd() {
   const base = getSiteUrl();
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": `${base}/#website`,
     name: SITE_NAME,
     url: `${base}/`,
     inLanguage: "th-TH",
+    publisher: { "@type": "Person", name: SITE_AUTHOR },
+  };
+}
+
+/** BreadcrumbList — สะท้อน breadcrumb ที่แสดงจริงบนหน้า (Home → หน้านั้น) → rich result + เข้าใจโครงสร้างเว็บ */
+export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
+  const base = getSiteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: it.name,
+      item: `${base}${it.path}`,
+    })),
+  };
+}
+
+/** ItemList ของบทความบนหน้าแรก — เสริมความเข้าใจว่าหน้าแรกคือศูนย์รวมคอนเทนต์ (semantic; ไม่ใช่ carousel rich result) */
+export function blogItemListJsonLd(items: { title: string; slug: string }[]) {
+  const base = getSiteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: items.map((a, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${base}/articles/${a.slug}`,
+      name: a.title,
+    })),
   };
 }
 
