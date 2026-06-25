@@ -309,6 +309,12 @@ export default function Home() {
               </div>
             ))}
           </div>
+          <Link
+            href="/about"
+            className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-foreground hover:text-betta"
+          >
+            อ่านเพิ่มเกี่ยวกับเรา <span aria-hidden>→</span>
+          </Link>
         </Reveal>
       </section>
 

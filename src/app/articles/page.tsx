@@ -15,6 +15,20 @@ export const metadata: Metadata = {
     canonical: "/articles",
     types: { "application/rss+xml": "/feed.xml" },
   },
+  openGraph: {
+    type: "website",
+    locale: "th_TH",
+    siteName: "BettaHub",
+    title: "บทความทั้งหมด · BettaHub",
+    description: "รวมคู่มือและรีวิวเรื่องการเลี้ยงปลากัดทั้งหมดของ BettaHub",
+    images: ["/og-default.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "บทความทั้งหมด · BettaHub",
+    description: "รวมคู่มือและรีวิวเรื่องการเลี้ยงปลากัดทั้งหมดของ BettaHub",
+    images: ["/og-default.png"],
+  },
 };
 
 export default function ArticlesIndex() {

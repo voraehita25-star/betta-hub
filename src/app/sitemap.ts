@@ -20,6 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       images: [`${base}/images/hero.jpg`],
     },
     { url: `${base}/articles`, lastModified: new Date(latest), changeFrequency: "weekly", priority: 0.7 },
+    { url: `${base}/about`, lastModified: new Date("2026-06-26"), changeFrequency: "yearly", priority: 0.5 },
     { url: `${base}/tools/water-change`, lastModified: new Date("2026-06-18"), changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/privacy`, lastModified: new Date("2026-06-22"), changeFrequency: "yearly", priority: 0.3 },
   ];
