@@ -5,6 +5,20 @@ import { SITE_NAME, SITE_AUTHOR, getSiteUrl, imageDims } from "@/lib/site";
 // ยึดความซื่อสัตย์: author เป็น Person ตามที่ลงชื่อจริง, ไม่ปลอม Organization/logo (ขัดหน้า privacy ที่ระบุว่าไม่ใช่องค์กร)
 // และไม่ใส่ aggregateRating/review/HowTo ปลอม
 
+// หัวข้อที่ผู้เขียนเชี่ยวชาญ — เสริมสัญญาณ E-E-A-T (ใช้ใน author ของบทความ + ProfilePage ของ /about)
+const KNOWS_ABOUT = [
+  "การเลี้ยงปลากัด",
+  "การจัดตู้ปลากัด",
+  "เครื่องกรองตู้ปลา",
+  "อาหารปลากัด",
+  "การดูแลคุณภาพน้ำ",
+];
+
+/** Person ผู้เขียน — โยงไป /about ให้ search/AI ยืนยันตัวตนผู้เขียนได้ (ไม่มี sameAs เพราะยังไม่มีโปรไฟล์สาธารณะจริง) */
+function authorPerson(base: string, name: string) {
+  return { "@type": "Person", name, url: `${base}/about`, knowsAbout: KNOWS_ABOUT };
+}
+
 /** ImageObject แบบ absolute URL + ใส่ width/height ถ้ารู้ขนาดจริง (Google แนะนำให้มี) */
 function imageObject(path: string, base: string) {
   const d = imageDims(path);
@@ -33,7 +47,7 @@ export function articleJsonLd(article: Article) {
     articleSection: article.category,
     timeRequired: `PT${article.readMin}M`,
     inLanguage: "th-TH",
-    author: { "@type": "Person", name: article.author },
+    author: authorPerson(base, article.author),
     publisher: { "@type": "Person", name: article.author },
     // เชื่อมเข้ากับ WebSite entity เดียวของเว็บ
     isPartOf: { "@type": "WebSite", "@id": `${base}/#website` },
@@ -83,6 +97,27 @@ export function blogItemListJsonLd(items: { title: string; slug: string }[]) {
       url: `${base}/articles/${a.slug}`,
       name: a.title,
     })),
+  };
+}
+
+/** ProfilePage ของหน้า /about — โยงตัวตนผู้เขียน (Person + knowsAbout) ให้ search/AI ยืนยัน E-E-A-T */
+export function aboutJsonLd() {
+  const base = getSiteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    "@id": `${base}/about`,
+    url: `${base}/about`,
+    inLanguage: "th-TH",
+    isPartOf: { "@type": "WebSite", "@id": `${base}/#website` },
+    mainEntity: {
+      "@type": "Person",
+      name: SITE_AUTHOR,
+      url: `${base}/about`,
+      description:
+        "ผู้ดูแลและผู้เขียน BettaHub — ผู้เลี้ยงปลากัดที่แบ่งปันคู่มือและรีวิวอุปกรณ์จากประสบการณ์จริง ดูแลเว็บในฐานะงานอดิเรกของบุคคลคนเดียว ไม่ใช่องค์กร",
+      knowsAbout: KNOWS_ABOUT,
+    },
   };
 }
 

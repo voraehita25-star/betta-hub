@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useId } from "react";
 import { formatThaiDate } from "@/lib/site";
-import { getAdjacentArticles, type Article } from "@/lib/content";
+import { articles, getAdjacentArticles, type Article } from "@/lib/content";
 import { breadcrumbJsonLd, faqJsonLd } from "@/lib/jsonld";
 import { affiliateHref } from "@/lib/affiliate";
 import { Breadcrumb } from "@/components/breadcrumb";
@@ -285,6 +285,27 @@ export function ArticleFooterNav({ currentSlug }: { currentSlug?: string }) {
           ) : (
             <span className="hidden sm:block" />
           )}
+        </nav>
+      )}
+      {currentSlug && (
+        <nav aria-label="คู่มืออื่นๆ" className="mb-8">
+          <h2 className="font-heading text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            คู่มืออื่นๆ
+          </h2>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+            {articles
+              .filter((a) => a.available && a.slug !== currentSlug)
+              .map((a) => (
+                <li key={a.slug}>
+                  <Link
+                    href={`/articles/${a.slug}`}
+                    className="text-sm text-foreground/80 underline-offset-2 hover:text-betta hover:underline"
+                  >
+                    {a.title}
+                  </Link>
+                </li>
+              ))}
+          </ul>
         </nav>
       )}
       <Link
